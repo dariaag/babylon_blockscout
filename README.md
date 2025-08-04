@@ -26,7 +26,67 @@ Blockscout currently supports several hundred chains and rollups throughout the 
 
 ## Getting Started
 
-See the [project documentation](https://docs.blockscout.com/) for instructions:
+## Babylon Edge Devnet Configuration
+
+This repository contains a pre-configured Blockscout instance for the **Babylon Edge Devnet** (Chain ID: 6901).
+
+### Key Configuration Changes
+
+- **RPC Endpoint**: `https://evm-rpc.edge-devnet.babylonlabs.io`
+- **Chain ID**: `6901` (Babylon Edge devnet)
+- **Indexing Start**: Block `201719`
+- **Continuous Indexing**: No end block limit - indexes all new blocks as they are produced
+
+### Quick Start
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/dariaag/babylon_blockscout.git
+   cd babylon_blockscout
+   ```
+
+2. **Start the services**:
+   ```bash
+   cd docker-compose
+   docker-compose up -d
+   ```
+
+3. **Access the explorer**:
+   - Frontend: http://localhost
+   - API: http://localhost/api/v2
+
+4. **Check the logs**:
+   ```bash
+   docker-compose logs backend
+   ```
+
+5. **Monitor indexing progress**:
+   ```bash
+   docker exec db psql -U blockscout -d blockscout -c "SELECT COUNT(*) as block_count FROM blocks;"
+   ```
+
+### Configuration Files Modified
+
+- `docker-compose/docker-compose.yml` - Updated RPC URLs and chain ID
+- `docker-compose/envs/common-blockscout.env` - Set Babylon Edge devnet configuration
+- `docker-compose/services/backend.yml` - Added explicit environment variables
+- `docker-compose/services/user-ops-indexer.yml` - Updated RPC URL
+
+### Troubleshooting
+
+**If blocks aren't syncing**:
+1. Check the backend logs: `docker-compose logs backend`
+2. Verify RPC connectivity: `docker exec backend curl -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' https://evm-rpc.edge-devnet.babylonlabs.io`
+3. Clear database if needed: `docker exec db psql -U blockscout -d blockscout -c "DELETE FROM logs; DELETE FROM blocks;"`
+
+**Reset to start from a specific block**:
+1. Update `FIRST_BLOCK` in `docker-compose/envs/common-blockscout.env`
+2. Clear the database
+3. Restart: `docker-compose down && docker-compose up -d`
+
+### General Deployment Options
+
+For other networks, see the [project documentation](https://docs.blockscout.com/) for instructions:
 
 - [Manual deployment](https://docs.blockscout.com/for-developers/deployment/manual-deployment-guide)
 - [Docker-compose deployment](https://docs.blockscout.com/for-developers/deployment/docker-compose-deployment)
